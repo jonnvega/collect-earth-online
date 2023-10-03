@@ -545,16 +545,13 @@ const BandSelector = ({imageryType, updateBandCombination, bandCombination}) => 
   const handleOptionSelect = (event) => {
     const value = event.target.value;
     setSelectedOptions((prevSelectedOptions) => {
+      if (value === "clear") {return [];} else 
       if (prevSelectedOptions.includes(value)) {
         return prevSelectedOptions.filter((option) => option !== value);
-      } else
-        if (value === "clear") {
-          return [];
-        } else
-        
+      } else                
       {
         return [...prevSelectedOptions, value];
-      }
+      } 
     });
   };
 
@@ -591,7 +588,7 @@ const BandSelector = ({imageryType, updateBandCombination, bandCombination}) => 
           <div className="slide-container">
           <button
             className="btn btn-lightgreen btn-sm btn-block"
-            /* onClick={updateBandCombination({bandCombination: selectedOptions.join(",")})} */
+            onClick={() => updateBandCombination({bandCombination: selectedOptions.join(",")})}
             type="button"
           >
             Update Band Combination
@@ -678,7 +675,7 @@ export class SentinelMenu extends React.Component {
           <label>Month: {monthlyMapping[this.state.month]}</label>
         </div>
         <div className="slide-container">
-          <label>Band Combination</label>
+          <label>Band Combination: {this.state.bandCombination}</label>
           <BandSelector
             imageryType = {this.props.sourceConfig.type}
             updateBandCombination = {(e)=>this.setState(e)}
