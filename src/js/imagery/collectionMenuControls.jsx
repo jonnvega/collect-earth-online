@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import Select from "../components/Select";
 import { mercator } from "../utils/mercator";
@@ -106,8 +106,8 @@ export class PlanetDailyMenu extends React.Component {
   componentDidUpdate(prevProps) {
     if (
       this.props.visible &&
-      ((this.props.currentPlot && this.props.currentPlot !== prevProps.currentPlot) ||
-        prevProps.visible !== this.props.visible)
+        ((this.props.currentPlot && this.props.currentPlot !== prevProps.currentPlot) ||
+         prevProps.visible !== this.props.visible)
     ) {
       this.updateImageryInformation();
     }
@@ -367,32 +367,32 @@ export class SecureWatchMenu extends React.Component {
   };
 
   onChangeSingleLayer = (eventTarget) =>
-    this.updateSingleLayer(
-      eventTarget.value,
-      eventTarget.options[eventTarget.selectedIndex].getAttribute("date"),
-      eventTarget.options[eventTarget.options.selectedIndex].getAttribute("cloud")
-    );
+  this.updateSingleLayer(
+    eventTarget.value,
+    eventTarget.options[eventTarget.selectedIndex].getAttribute("date"),
+    eventTarget.options[eventTarget.options.selectedIndex].getAttribute("cloud")
+  );
 
   getAvailableDates = () => {
     const { thisImageryId, sourceConfig, visible, extent, setImageryAttribution } = this.props;
     if (visible) setImageryAttribution(" | Loading...");
     const secureWatchFeatureInfoUrl =
-      "SERVICE=WMS" +
-      "&VERSION=1.1.1" +
-      "&REQUEST=GetFeatureInfo" +
-      "&CRS=EPSG%3A3857" +
-      "&BBOX=" +
-      extent.join(",") +
-      "&WIDTH=256" +
-      "&HEIGHT=256" +
-      "&LAYERS=DigitalGlobe:ImageryFootprint" +
-      "&QUERY_LAYERS=DigitalGlobe:ImageryFootprint" +
-      "&FEATURE_COUNT=1000" +
-      "&X=0" +
-      "&Y=0" +
-      "&INFO_FORMAT=application/json" +
-      "&imageryId=" +
-      thisImageryId;
+          "SERVICE=WMS" +
+          "&VERSION=1.1.1" +
+          "&REQUEST=GetFeatureInfo" +
+          "&CRS=EPSG%3A3857" +
+          "&BBOX=" +
+          extent.join(",") +
+          "&WIDTH=256" +
+          "&HEIGHT=256" +
+          "&LAYERS=DigitalGlobe:ImageryFootprint" +
+          "&QUERY_LAYERS=DigitalGlobe:ImageryFootprint" +
+          "&FEATURE_COUNT=1000" +
+          "&X=0" +
+          "&Y=0" +
+          "&INFO_FORMAT=application/json" +
+          "&imageryId=" +
+          thisImageryId;
     this.setState({ availableDates: [] }, () => {
       fetch(`/get-securewatch-dates?${secureWatchFeatureInfoUrl}`)
         .then((response) => {
@@ -416,10 +416,10 @@ export class SecureWatchMenu extends React.Component {
               availableDates: data.features
                 .filter(
                   (feature) =>
-                    Date.parse(feature.properties.acquisitionDate) <=
-                      Date.parse(sourceConfig.endDate) &&
+                  Date.parse(feature.properties.acquisitionDate) <=
+                    Date.parse(sourceConfig.endDate) &&
                     Date.parse(feature.properties.acquisitionDate) >=
-                      Date.parse(sourceConfig.startDate)
+                    Date.parse(sourceConfig.startDate)
                 )
                 .map((feature) => ({
                   acquisitionDate: feature.properties.acquisitionDate,
@@ -482,6 +482,126 @@ export class SecureWatchMenu extends React.Component {
   }
 }
 
+const MultiSelectDropdown = ({ sourceConfig }) => {
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [options, setOptions] = useState([]);
+
+  useEffect(() => {
+    // Update options based on the sourceConfig prop
+    setOptions(sourceConfig);
+  }, [sourceConfig]);
+
+  const handleOptionSelect = (event) => {
+    const value = event.target.value;
+    setSelectedOptions((prevSelectedOptions) => {
+      if (prevSelectedOptions.includes(value)) {
+        return prevSelectedOptions.filter((option) => option !== value);
+      } else {
+        return [...prevSelectedOptions, value];
+      }
+    });
+  };
+
+  return (
+    <div>
+      <select
+        multiple
+        value={selectedOptions}
+        onChange={handleOptionSelect}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
+const BandSelector = ({imageryType, updateBandCombination, bandCombination}) => {
+  const sentinelBandOptions = [            
+    { label: "VH", value: "VH" },
+    { label: "VV", value: "VV" },
+    { label: "HV", value: "HV" },
+    { label: "  ", value: "clear" }
+  ];
+  const bandCombinationOptions =  [    
+    { label: "True Color", value: "TrueColor" },
+    { label: "False Color Infrared", value: "FalseColorInfrared" },
+    { label: "False Color Urban", value: "FalseColorUrban" },
+    { label: "Agriculture", value: "Agriculture" },
+    { label: "Healthy Vegetation", value: "HealthyVegetation" },
+    { label: "Short Wave Infrared", value: "ShortWaveInfrared" },
+  ];
+
+  const [selectedOptions, setSelectedOptions] = useState([]);
+  const [options, setOptions] = useState([]);
+
+  useEffect(() => {
+    imageryType === "Sentinel1" ? setOptions(sentinelBandOptions): setOptions(bandCombinationOptions);
+  }, [imageryType]);
+  
+  const handleOptionSelect = (event) => {
+    const value = event.target.value;
+    setSelectedOptions((prevSelectedOptions) => {
+      if (prevSelectedOptions.includes(value)) {
+        return prevSelectedOptions.filter((option) => option !== value);
+      } else
+        if (value === "clear") {
+          return [];
+        } else
+        
+      {
+        return [...prevSelectedOptions, value];
+      }
+    });
+  };
+
+  
+  const selectComponent =
+        <select
+          className="form-control"
+          id="sentinel-bandCombination"
+          onChange={(e) => updateBandCombination({ bandCombination: e.target.value })}
+          value={bandCombination}
+        >
+          {bandCombinationOptions.map((el) => (
+            <option key={el.value} value={el.value}>
+              {el.label}
+            </option>
+          ))}
+        </select>;
+
+  const sentinelComponent =
+        <React.Fragment>
+          <select
+            multiple = "multiple"
+            className="form-control"
+            id="sentinel-bandCombination"
+            onChange={handleOptionSelect}
+            value={selectedOptions}
+          >
+            {sentinelBandOptions.map((el) => (
+              <option key={el.value} value={el.value}>
+                {el.label}
+              </option>
+            ))}
+          </select>
+          <div className="slide-container">
+          <button
+            className="btn btn-lightgreen btn-sm btn-block"
+            /* onClick={updateBandCombination({bandCombination: selectedOptions.join(",")})} */
+            type="button"
+          >
+            Update Band Combination
+          </button>
+        </div>
+        </React.Fragment>;
+  
+  return imageryType === "Sentinel1" ? sentinelComponent : selectComponent;
+};
+
 export class SentinelMenu extends React.Component {
   constructor(props) {
     super(props);
@@ -509,8 +629,8 @@ export class SentinelMenu extends React.Component {
       );
       this.props.setImageryAttributes({
         [this.props.sourceConfig.type === "Sentinel1"
-          ? "sentinel1MosaicYearMonth"
-          : "sentinel2MosaicYearMonth"]: this.state.year + " - " + monthlyMapping[this.state.month],
+         ? "sentinel1MosaicYearMonth"
+         : "sentinel2MosaicYearMonth"]: this.state.year + " - " + monthlyMapping[this.state.month],
       });
     }
   };
@@ -531,22 +651,6 @@ export class SentinelMenu extends React.Component {
   };
 
   render() {
-    const bandCombinationOptions =
-      this.props.sourceConfig.type === "Sentinel1"
-          ? [            
-	    { label: "VH", value: "VH" },
-	    { label: "VV", value: "VV" },
-            { label: "HV", value: "HV" }
-          ]
-          : [
-            { label: "True Color", value: "TrueColor" },
-            { label: "False Color Infrared", value: "FalseColorInfrared" },
-            { label: "False Color Urban", value: "FalseColorUrban" },
-            { label: "Agriculture", value: "Agriculture" },
-            { label: "Healthy Vegetation", value: "HealthyVegetation" },
-            { label: "Short Wave Infrared", value: "ShortWaveInfrared" },
-          ];
-
     return (
       <div className="my-2" style={{ display: this.props.visible ? "block" : "none" }}>
         <div className="slide-container">
@@ -575,19 +679,11 @@ export class SentinelMenu extends React.Component {
         </div>
         <div className="slide-container">
           <label>Band Combination</label>
-          <select
-            className="form-control"
-            id="sentinel-bandCombination"
-            onClick={(e)=> console.log(e)}
-            onChange={(e) => this.setState({ bandCombination: e.target.value })}
-            value={this.state.bandCombination}
-          >
-            {bandCombinationOptions.map((el) => (
-              <option key={el.value} value={el.value}>
-                {el.label}
-              </option>
-            ))}
-          </select>
+          <BandSelector
+            imageryType = {this.props.sourceConfig.type}
+            updateBandCombination = {(e)=>this.setState(e)}
+            bandCombination = {this.state.bandCombination}
+          />                    
         </div>
         <div className="slide-container">
           <button
