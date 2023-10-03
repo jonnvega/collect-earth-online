@@ -491,7 +491,7 @@ export class SentinelMenu extends React.Component {
       bandCombination: this.props.sourceConfig.bandCombination,
     };
   }
-
+  
   componentDidMount() {
     this.updateImageryInformation();
   }
@@ -533,13 +533,12 @@ export class SentinelMenu extends React.Component {
   render() {
     const bandCombinationOptions =
       this.props.sourceConfig.type === "Sentinel1"
-        ? [
-            { label: "VH,VV,VH/VV", value: "VH,VV,VH/VV" },
-            { label: "VH,VV,VV/VH", value: "VH,VV,VV/VH" },
-            { label: "VV,VH,VV/VH", value: "VV,VH,VV/VH" },
-            { label: "VV,VH,VH/VV", value: "VV,VH,VH/VV" },
+          ? [            
+	    { label: "VH", value: "VH" },
+	    { label: "VV", value: "VV" },
+            { label: "HV", value: "HV" }
           ]
-        : [
+          : [
             { label: "True Color", value: "TrueColor" },
             { label: "False Color Infrared", value: "FalseColorInfrared" },
             { label: "False Color Urban", value: "FalseColorUrban" },
@@ -579,6 +578,7 @@ export class SentinelMenu extends React.Component {
           <select
             className="form-control"
             id="sentinel-bandCombination"
+            onClick={(e)=> console.log(e)}
             onChange={(e) => this.setState({ bandCombination: e.target.value })}
             value={this.state.bandCombination}
           >

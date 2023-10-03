@@ -244,10 +244,9 @@ export const imageryOptions = [
         display: "Band Combination",
         type: "select",
         options: [
-          { label: "VH,VV,VH/VV", value: "VH,VV,VH/VV" },
-          { label: "VH,VV,VV/VH", value: "VH,VV,VV/VH" },
-          { label: "VV,VH,VV/VH", value: "VV,VH,VV/VH" },
-          { label: "VV,VH,VH/VV", value: "VV,VH,VH/VV" },
+	  {label: "VH", value: "VH"},
+	  {label: "VV", value: "VV"},
+	  {label: "HV", value: "HV"}
         ],
       },
       {
