@@ -72,9 +72,9 @@ class ReviewInstitution extends React.Component {
   /// Helpers
 
   processModal = (message, promise) =>
-    this.setState({ modalMessage: message }, () =>
-      promise.finally(() => this.setState({ modalMessage: null }))
-    );
+  this.setState({ modalMessage: message }, () =>
+    promise.finally(() => this.setState({ modalMessage: null }))
+  );
 
   /// Render Function
 
@@ -238,12 +238,12 @@ class InstitutionDescription extends React.Component {
   toggleEditMode = () => this.setState({ editMode: !this.state.editMode });
 
   updateNewInstitutionDetails = (key, newValue) =>
-    this.setState({
-      newInstitutionDetails: {
-        ...this.state.newInstitutionDetails,
-        [key]: newValue,
-      },
-    });
+  this.setState({
+    newInstitutionDetails: {
+      ...this.state.newInstitutionDetails,
+      [key]: newValue,
+    },
+  });
 
   deleteInstitution = () => {
     if (
@@ -499,13 +499,13 @@ class ImageryList extends React.Component {
     const toVisibility = currentVisibility === "private" ? "public" : "private";
     if (
       this.props.userId === 1 &&
-      confirm(
-        `Do you want to change the visibility from ${currentVisibility} to ${toVisibility}?` +
-          `${
+        confirm(
+          `Do you want to change the visibility from ${currentVisibility} to ${toVisibility}?` +
+            `${
             toVisibility === "private" &&
             "  This will remove the imagery from other institutions' projects."
           }`
-      )
+        )
     ) {
       fetch("/update-imagery-visibility", {
         method: "POST",
@@ -543,91 +543,91 @@ class ImageryList extends React.Component {
   //    Helper Functions    //
 
   titleIsTaken = (newTitle, idToExclude) =>
-    this.state.imageryList.some((i) => i.title === newTitle && i.id !== idToExclude);
+  this.state.imageryList.some((i) => i.title === newTitle && i.id !== idToExclude);
 
   showDeleteImageryWarning = (id) =>
-    this.setState({
-      messageBox: {
-        body: "Are you sure you want to delete this imagery? This is irreversible.",
-        closeText: "Cancel",
-        confirmText: "Yes, I'm sure",
-        danger: true,
-        onConfirm: () => this.deleteImagery(id),
-        title: "Warning: Removing Imagery",
-        type: "confirm",
-      },
-    });
+  this.setState({
+    messageBox: {
+      body: "Are you sure you want to delete this imagery? This is irreversible.",
+      closeText: "Cancel",
+      confirmText: "Yes, I'm sure",
+      danger: true,
+      onConfirm: () => this.deleteImagery(id),
+      title: "Warning: Removing Imagery",
+      type: "confirm",
+    },
+  });
 
   showAlert = ({ title, body, closeText }) =>
-    this.setState({
-      messageBox: {
-        body,
-        closeText,
-        title,
-        type: "alert",
-      },
-    });
+  this.setState({
+    messageBox: {
+      body,
+      closeText,
+      title,
+      type: "alert",
+    },
+  });
 
   render() {
     return (
       this.props.isVisible &&
-      (this.state.imageryToEdit ? (
-        <NewImagery
-          getImageryList={this.getImageryList}
-          hideEditMode={this.hideEditMode}
-          imageryToEdit={this.state.imageryToEdit}
-          institutionId={this.props.institutionId}
-          nicfiLayers={this.state.nicfiLayers}
-          titleIsTaken={this.titleIsTaken}
-        />
-      ) : (
-        <>
-          <div className="mb-3">
-            This is a list of available imagery for this institution. For each project you can
-            select to use some or all of these imagery.
-          </div>
-          {this.props.isAdmin && (
-            <div className="row">
-              <div className="col-lg-12 mb-3">
-                <button
-                  className="btn btn-sm btn-block btn-lightgreen py-2 font-weight-bold"
-                  id="add-imagery-button"
-                  onClick={this.selectAddImagery}
-                  style={{
-                    alignItems: "center",
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                  type="button"
-                >
-                  <SvgIcon icon="plus" size="1rem" />
-                  <span style={{ marginLeft: "0.4rem" }}>Add New Imagery</span>
-                </button>
-              </div>
+        (this.state.imageryToEdit ? (
+          <NewImagery
+            getImageryList={this.getImageryList}
+            hideEditMode={this.hideEditMode}
+            imageryToEdit={this.state.imageryToEdit}
+            institutionId={this.props.institutionId}
+            nicfiLayers={this.state.nicfiLayers}
+            titleIsTaken={this.titleIsTaken}
+          />
+        ) : (
+          <>
+            <div className="mb-3">
+              This is a list of available imagery for this institution. For each project you can
+              select to use some or all of these imagery.
             </div>
-          )}
-          {this.state.imageryList.length === 0 ? (
-            <h3>Loading imagery...</h3>
-          ) : (
-            this.state.imageryList.map(({ id, title, institution, visibility }) => (
-              <Imagery
-                key={id}
-                canEdit={this.props.isAdmin && this.props.institutionId === institution}
-                deleteImagery={() => this.showDeleteImageryWarning(id)}
-                selectEditImagery={() => this.selectEditImagery(id)}
-                title={title}
-                toggleVisibility={() => this.toggleVisibility(id, visibility)}
-                visibility={visibility}
-              />
-            ))
-          )}
-          {this.state.messageBox && (
-            <Modal {...this.state.messageBox} onClose={() => this.setState({ messageBox: null })}>
-              <p>{this.state.messageBox.body}</p>
-            </Modal>
-          )}
-        </>
-      ))
+            {this.props.isAdmin && (
+              <div className="row">
+                <div className="col-lg-12 mb-3">
+                  <button
+                    className="btn btn-sm btn-block btn-lightgreen py-2 font-weight-bold"
+                    id="add-imagery-button"
+                    onClick={this.selectAddImagery}
+                    style={{
+                      alignItems: "center",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                    type="button"
+                  >
+                    <SvgIcon icon="plus" size="1rem" />
+                    <span style={{ marginLeft: "0.4rem" }}>Add New Imagery</span>
+                  </button>
+                </div>
+              </div>
+            )}
+            {this.state.imageryList.length === 0 ? (
+              <h3>Loading imagery...</h3>
+            ) : (
+              this.state.imageryList.map(({ id, title, institution, visibility }) => (
+                <Imagery
+                  key={id}
+                  canEdit={this.props.isAdmin && this.props.institutionId === institution}
+                  deleteImagery={() => this.showDeleteImageryWarning(id)}
+                  selectEditImagery={() => this.selectEditImagery(id)}
+                  title={title}
+                  toggleVisibility={() => this.toggleVisibility(id, visibility)}
+                  visibility={visibility}
+                />
+              ))
+            )}
+            {this.state.messageBox && (
+              <Modal {...this.state.messageBox} onClose={() => this.setState({ messageBox: null })}>
+                <p>{this.state.messageBox.body}</p>
+              </Modal>
+            )}
+          </>
+        ))
     );
   }
 }
@@ -700,13 +700,13 @@ class NewImagery extends React.Component {
   validateParams = (type, imageryParams) => {
     const parameterErrors = imageryOptions[type].params.map(
       (param) =>
-        (param.required !== false &&
-          (!imageryParams[param.key] || imageryParams[param.key].length === 0) &&
-          `${param.display} is required.`) ||
+      (param.required !== false &&
+       (!imageryParams[param.key] || imageryParams[param.key].length === 0) &&
+       `${param.display} is required.`) ||
         (param.validator && param.validator(imageryParams[param.key]))
     );
     const imageryError =
-      imageryOptions[type].validator && imageryOptions[type].validator(imageryParams);
+          imageryOptions[type].validator && imageryOptions[type].validator(imageryParams);
     return [...parameterErrors, imageryError].filter((error) => error);
   };
 
@@ -808,15 +808,16 @@ class NewImagery extends React.Component {
     </div>
   );
 
-  formSelect = (title, value, callback, options, link = null) => (
+  formSelect = (title, value, callback, options, link = null, multiple) => (
     <div key={title} className="mb-3">
       <label>{title}</label> {link}
-      <select multiple="multiple" className="form-control" onChange={(e) => callback(e)} value={value}>
+      <select className="form-control" onChange={(e) => callback(e)} value={multiple ? value.split(",") : value}
+              {...(multiple ? { multiple: 'multiple' } : {})}>
         {options}
       </select>
     </div>
   );
-
+  
   formCheck = (title, checked, callback) => (
     <div key={title} className="mb-0">
       <label>
@@ -839,79 +840,105 @@ class NewImagery extends React.Component {
   );
 
   accessTokenLink = (url, key) =>
-    url && key === "accessToken" ? (
-      <a
-        href={imageryOptions[this.state.selectedType].url}
-        rel="noreferrer noopener"
-        target="_blank"
-      >
-        Click here for help.
-      </a>
-    ) : null;
+  url && key === "accessToken" ? (
+    <a
+      href={imageryOptions[this.state.selectedType].url}
+      rel="noreferrer noopener"
+      target="_blank"
+    >
+      Click here for help.
+    </a>
+  ) : null;
 
+  handleSelectChange = (e, o) => {
+    const selectedValues = Array.from(e.target.options)
+          .filter((option) => option.selected)
+          .map((option) => option.value);
+
+
+    o.multiple ? 
+      
+    this.setState({
+      imageryParams: {
+        ...this.state.imageryParams,
+        [o.key]: selectedValues.join(","),
+      },
+      imageryAttribution:
+      imageryOptions[this.state.selectedType].type === "BingMaps"
+        ? "Bing Maps API: " + e.target.value + " | © Microsoft Corporation"
+        : this.state.imageryAttribution,
+    })
+
+      :
+      this.setState({
+        imageryParams: {
+          ...this.state.imageryParams,
+          [o.key]: e.target.value,
+        },
+        imageryAttribution:
+        imageryOptions[this.state.selectedType].type === "BingMaps"
+          ? "Bing Maps API: " + e.target.value + " | © Microsoft Corporation"
+          : this.state.imageryAttribution,
+      })
+
+    ;
+  }
+  
+  
   formTemplate = (o) =>
-    o.type === "select"
-      ? this.formSelect(
-          o.display,
-          this.state.imageryParams[o.key],
-          (e) =>
-            this.setState({
-              imageryParams: {
-                ...this.state.imageryParams,
-                [o.key]: e.target.value,
-              },
-              imageryAttribution:
-                imageryOptions[this.state.selectedType].type === "BingMaps"
-                  ? "Bing Maps API: " + e.target.value + " | © Microsoft Corporation"
-                  : this.state.imageryAttribution,
-            }),
-          o.options.map((el) => (
-            <option key={el.value} value={el.value}>
-              {el.label}
-            </option>
-          )),
-          this.accessTokenLink(imageryOptions[this.state.selectedType].url, o.key)
-        )
-      : ["textarea", "JSON"].includes(o.type)
-      ? this.formTextArea(
-          o.display,
-          this.state.imageryParams[o.key],
-          (e) =>
-            this.setState({
-              imageryParams: { ...this.state.imageryParams, [o.key]: e.target.value },
-            }),
-          this.accessTokenLink(imageryOptions[this.state.selectedType].url, o.key),
-          o.options ? o.options : {}
-        )
-      : this.formInput(
-          o.display,
-          o.type || "text",
-          this.state.imageryParams[o.key],
-          (e) =>
-            this.setState({
-              imageryParams: { ...this.state.imageryParams, [o.key]: e.target.value },
-            }),
-          this.accessTokenLink(imageryOptions[this.state.selectedType].url, o.key),
-          o.options ? o.options : {}
-        );
+  o.type === "select"
+    ? this.formSelect(
+      o.display,
+      this.state.imageryParams[o.key],
+      (e) => this.handleSelectChange(e, o),
+      o.options.map((el) => (
+        <option key={el.value} value={el.value}>
+          {el.label}
+        </option>
+      )),
+      this.accessTokenLink(imageryOptions[this.state.selectedType].url, o.key),
+      o.multiple      
+    )
+    : ["textarea", "JSON"].includes(o.type)
+    ? this.formTextArea(
+      o.display,
+      this.state.imageryParams[o.key],
+      (e) =>
+      this.setState({
+        imageryParams: { ...this.state.imageryParams, [o.key]: e.target.value },
+      }),
+      this.accessTokenLink(imageryOptions[this.state.selectedType].url, o.key),
+      o.options ? o.options : {}
+    )
+    : this.formInput(
+      o.display,
+      o.type || "text",
+      this.state.imageryParams[o.key],
+      (e) =>
+      this.setState({
+        imageryParams: { ...this.state.imageryParams, [o.key]: e.target.value },
+      }),
+      this.accessTokenLink(imageryOptions[this.state.selectedType].url, o.key),
+      o.options ? o.options : {}
+    );
 
   // Imagery Type Change Handler //
 
   // TODO, this can be generalized back into imageryOptions
   getImageryAttribution = (type) =>
-    type === "BingMaps"
-      ? "Bing Maps API: Aerial | © Microsoft Corporation"
-      : type.includes("Planet")
-      ? "Planet Labs Global Mosaic | © Planet Labs, Inc"
-      : type === "SecureWatch"
-      ? "SecureWatch Imagery | © Maxar Technologies Inc."
-      : ["Sentinel1", "Sentinel2"].includes(type) || type.includes("GEE")
-      ? "Google Earth Engine | © Google LLC"
-      : type.includes("MapBox")
-      ? "© Mapbox"
-      : type === "OSM"
-      ? "Open Street Map"
-      : "";
+  type === "BingMaps"
+    ? "Bing Maps API: Aerial | © Microsoft Corporation"
+    : type.includes("Planet")
+    ? "Planet Labs Global Mosaic | © Planet Labs, Inc"
+    : type === "SecureWatch"
+    ? "SecureWatch Imagery | © Maxar Technologies Inc."
+    : ["Sentinel1", "Sentinel2"].includes(type) || type.includes("GEE")
+    ? "Google Earth Engine | © Google LLC"
+    : type.includes("MapBox")
+    ? "© Mapbox"
+    : type === "OSM"
+    ? "Open Street Map"
+    : "";
 
   setImageryToEdit = () => {
     const { title, attribution, isProxied, sourceConfig } = this.props.imageryToEdit;
@@ -949,8 +976,8 @@ class NewImagery extends React.Component {
     const { type, params, optionalProxy } = imageryOptions[this.state.selectedType];
     // This is annoyingly hard coded.
     const displayParams =
-      type === "PlanetNICFI"
-        ? [
+          type === "PlanetNICFI"
+          ? [
             params[0],
             {
               ...params[1],
@@ -961,7 +988,7 @@ class NewImagery extends React.Component {
             },
             params[2],
           ]
-        : params;
+          : params;
 
     return (
       <div className="mb-2 p-4 border rounded">
@@ -988,14 +1015,14 @@ class NewImagery extends React.Component {
         )}
         {/* This should be generalized into the imageryOptions */}
         {["GeoServer", "xyz"].includes(type) &&
-          this.formInput("Attribution", "text", this.state.imageryAttribution, (e) =>
-            this.setState({ imageryAttribution: e.target.value })
-          )}
+         this.formInput("Attribution", "text", this.state.imageryAttribution, (e) =>
+           this.setState({ imageryAttribution: e.target.value })
+         )}
         {displayParams.map((o) => this.formTemplate(o))}
         {optionalProxy &&
-          this.formCheck("Proxy Imagery", this.state.isProxied, () =>
-            this.setState({ isProxied: !this.state.isProxied })
-          )}
+         this.formCheck("Proxy Imagery", this.state.isProxied, () =>
+           this.setState({ isProxied: !this.state.isProxied })
+         )}
         {/* Add Imagery to All Projects checkbox */}
         <div className="mb-3">
           <input
@@ -1193,11 +1220,11 @@ function Project({ project, isAdmin, deleteProject }) {
           href={`/collection?projectId=${project.id}`}
           style={{
             boxShadow:
-              project.percentComplete === 0.0
-                ? "0px 0px 6px 1px red inset"
-                : project.percentComplete >= 100.0
-                ? "0px 0px 6px 2px #3bb9d6 inset"
-                : "0px 0px 6px 1px yellow inset",
+            project.percentComplete === 0.0
+              ? "0px 0px 6px 1px red inset"
+              : project.percentComplete >= 100.0
+              ? "0px 0px 6px 2px #3bb9d6 inset"
+              : "0px 0px 6px 1px yellow inset",
           }}
         >
           {project.name}
@@ -1295,7 +1322,7 @@ class UserList extends React.Component {
 
   updateUserInstitutionRole = (accountId, newUserEmail, newInstitutionRole) => {
     const existingRole = (this.state.institutionUserList.find((u) => u.id === accountId) || {})
-      .institutionRole;
+          .institutionRole;
     const lowerCaseNewUserEmail = newUserEmail.toLowerCase();
     const adminCount = this.state.institutionUserList.filter(
       (user) => user.institutionRole === "admin"
@@ -1354,11 +1381,11 @@ class UserList extends React.Component {
   };
 
   currentIsInstitutionMember = () =>
-    this.props.userId === 1 ||
+  this.props.userId === 1 ||
     this.state.institutionUserList.some((iu) => iu.id === this.props.userId);
 
   isInstitutionMember = (userEmail) =>
-    this.state.institutionUserList.some((iu) => iu.email === userEmail);
+  this.state.institutionUserList.some((iu) => iu.email === userEmail);
 
   render() {
     return (
@@ -1378,20 +1405,20 @@ class UserList extends React.Component {
             userId={this.props.userId}
           />
           {this.state.institutionUserList
-            .filter(
-              (iu) =>
-                iu.id === this.props.userId || this.props.isAdmin || iu.institutionRole === "admin"
-            )
-            .sort((a, b) => sortAlphabetically(a.email, b.email))
-            .sort((a, b) => sortAlphabetically(a.institutionRole, b.institutionRole))
-            .map((iu) => (
-              <User
-                key={iu.email}
-                isAdmin={this.props.isAdmin}
-                updateUserInstitutionRole={this.updateUserInstitutionRole}
-                user={iu}
-              />
-            ))}
+           .filter(
+             (iu) =>
+             iu.id === this.props.userId || this.props.isAdmin || iu.institutionRole === "admin"
+           )
+           .sort((a, b) => sortAlphabetically(a.email, b.email))
+           .sort((a, b) => sortAlphabetically(a.institutionRole, b.institutionRole))
+           .map((iu) => (
+             <User
+               key={iu.email}
+               isAdmin={this.props.isAdmin}
+               updateUserInstitutionRole={this.updateUserInstitutionRole}
+               user={iu}
+             />
+           ))}
         </>
       )
     );

@@ -243,6 +243,7 @@ export const imageryOptions = [
         key: "bandCombination",
         display: "Band Combination",
         type: "select",
+	multiple: true,
         options: [
 	  {label: "VH", value: "VH"},
 	  {label: "VV", value: "VV"},
