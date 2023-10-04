@@ -811,7 +811,7 @@ class NewImagery extends React.Component {
   formSelect = (title, value, callback, options, link = null) => (
     <div key={title} className="mb-3">
       <label>{title}</label> {link}
-      <select className="form-control" onChange={(e) => callback(e)} value={value}>
+      <select multiple="multiple" className="form-control" onChange={(e) => callback(e)} value={value}>
         {options}
       </select>
     </div>
