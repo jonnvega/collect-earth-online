@@ -115,12 +115,65 @@ export default class CreateProjectWizard extends React.Component {
       templateProject: {},
       templatePlots: [],
       templateProjectList: [{ id: -1, name: "Loading..." }],
+      draftProject: {
+        institution: -1,
+        name: "draft",
+        description: "draft",
+        designSettings: {
+          userAssignment: {
+            userMethod: "equal",
+            users: [],
+            percents: [],
+          },
+          qaqcAssignment: {
+            qaqcMethod: "none",
+            percent: 0,
+            smes: [],
+            timesToReview: 2,
+          },
+          sampleGeometries: {
+            points: true,
+            lines: true,
+            polygons: true,
+          },
+        },
+        projectOptions: {
+          showGEEScript: false,
+          showPlotInformation: false,
+          collectConfidence: false,
+          autoLaunchGeoDash: true,
+        },
+        plotDistribution: "csv",
+        imageryId: -1,
+        aoiFeatures: [],
+        aoiFileName: "",
+        boundaryType: "manual",
+        numPlots: "",
+        plotSpacing: "",
+        plotShape: "square",
+        plotSize: "",
+        shufflePlots: false,
+        sampleDistribution: "shp",
+        sampleResolution: "",
+        samplesPerPlot: "",
+        allowDrawnSamples: false,
+        surveyQuestions: {},
+        surveyRules: [],
+        templateProjectId: -1,
+        useTemplateWidgets: false,
+        useTemplatePlots: false,
+        projectImageryList: [],
+        plots: [],
+      }
     };
   }
 
   /// Lifecycle Methods
 
   componentDidMount() {
+    if (this.context.draftId > 0) {
+      this.getDraftById(this.context.draftId);
+    }
     Promise.all([this.getTemplateProjects(), this.getInstitutionUserList()]).catch((error) => {
       console.error(error);
       alert("Error retrieving the project data. See console for details.");
@@ -129,6 +182,118 @@ export default class CreateProjectWizard extends React.Component {
   }
 
   /// API Calls
+
+  getDraftById = (draftId) =>
+  fetch(`/get-draft-by-id?draftId=${draftId}`)
+    // .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+    // .then((data) => {
+    //   if (data === "") {
+    //     alert("No draft found with ID " + draftId + ".");
+    //     window.location = "/home";
+    //   } else {
+    //     this.context.setProjectDetails(data);
+    //     this.context.setContextState({ originalProject: data });
+    //     return data.institution;
+    //   }
+    // })
+    // .then((institutionId) => this.getInstitutionUserList(institutionId));
+    .then(() => this.context.setProjectDetails({ ...this.state.draftProject }))
+
+  buildDraftObject = () => ({
+    imageryId: this.context.imageryId,
+    projectImageryList: this.context.projectImageryList,
+    aoiFeatures: this.context.aoiFeatures,
+    aoiFileName: this.context.aoiFileName,
+    description: this.context.description,
+    name: this.context.name,
+    privacyLevel: this.context.privacyLevel,
+    projectOptions: this.context.projectOptions,
+    designSettings: this.context.designSettings,
+    numPlots: this.context.numPlots,
+    plotDistribution: this.context.plotDistribution,
+    plotShape: this.context.plotShape,
+    plotSize: this.context.plotSize,
+    plotSpacing: this.context.plotSpacing,
+    shufflePlots: this.context.shufflePlots,
+    sampleDistribution: this.context.sampleDistribution,
+    samplesPerPlot: this.context.samplesPerPlot,
+    sampleResolution: this.context.sampleResolution,
+    allowDrawnSamples: this.context.allowDrawnSamples,
+    surveyQuestions: this.context.surveyQuestions,
+    surveyRules: this.context.surveyRules,
+    plotFileName: this.context.plotFileName,
+    plotFileBase64: this.context.plotFileBase64,
+    sampleFileName: this.context.sampleFileName,
+    sampleFileBase64: this.context.sampleFileBase64,
+  });
+
+  saveDraft = (data) => {
+    if (this.context.projectDetails.draftId > 0) {
+      this.context.processModal("Updating Draft", () =>
+      fetch("/update-draft", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify({
+          draftId: this.context.draftId,
+          institutionId: this.context.institutionId,
+          projectTemplate: this.context.templateProjectId,
+          useTemplatePlots: this.context.useTemplatePlots,
+          useTemplateWidgets: this.context.useTemplateWidgets,
+          ...this.buildDraftObject(),
+        }),
+      })
+        // .then((response) => Promise.all([response.ok, response.json()]))
+        // .then((data) => {
+        //   if (data[0] && Number.isInteger(data[1].draftId)) {
+        //     this.context.setSuccessMessage("Draft saved.");
+        //     return Promise.resolve();
+        //   } else {
+        //     return Promise.reject(data[1]);
+        //   }
+        // })
+        .then(() => {
+          
+          this.context.setSuccessMessage("Draft saved.")})
+        .catch((message) => {
+          alert("Error creating draft:\n" + message);
+        })
+      );
+    } else {
+      this.context.processModal("Creating Draft", () =>
+      fetch("/create-draft", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json; charset=utf-8",
+        },
+        body: JSON.stringify({
+          institutionId: this.context.institutionId,
+          projectTemplate: this.context.templateProjectId,
+          useTemplatePlots: this.context.useTemplatePlots,
+          useTemplateWidgets: this.context.useTemplateWidgets,
+          ...this.buildDraftObject(),
+        }),
+      })
+        // .then((response) => Promise.all([response.ok, response.json()]))
+        // .then((data) => {
+        //   if (data[0] && Number.isInteger(data[1].draftId)) {
+        //     this.context.setSuccessMessage("Draft saved.");
+        //     return Promise.resolve();
+        //   } else {
+        //     return Promise.reject(data[1]);
+        //   }
+        // })
+        .then(() => this.context.setSuccessMessage("Draft saved."))
+        .catch((message) => {
+          alert("Error creating draft:\n" + message);
+        })
+      );
+    }
+  }
+
 
   getTemplateProjects = () =>
     fetch("/get-template-projects")
@@ -263,8 +428,10 @@ export default class CreateProjectWizard extends React.Component {
       [...projectImageryList, imageryId].every((id) =>
         institutionImagery.some((il) => il.id === id && il.visibility === "private")
       );
-    return getErrors({...this.context,
-                      requiresPublic: requiresPublic});
+    return getErrors({
+      ...this.context,
+      requiresPublic: requiresPublic
+    });
   };
 
   validatePlotData = () => {
@@ -278,10 +445,12 @@ export default class CreateProjectWizard extends React.Component {
     const plotFileNeeded =
       !useTemplatePlots &&
       (projectId === -1 || plotDistribution !== originalProject.plotDistribution);
-    
-    return getErrors({...this.context,
-                      totalPlots: totalPlots,
-                      plotFileNeeded: plotFileNeeded});
+
+    return getErrors({
+      ...this.context,
+      totalPlots: totalPlots,
+      plotFileNeeded: plotFileNeeded
+    });
   };
 
   validateSampleData = () => {
@@ -299,10 +468,12 @@ export default class CreateProjectWizard extends React.Component {
       (projectId === -1 ||
         sampleDistribution !== originalProject.sampleDistribution ||
         plotFileName);
-    return getErrors({...this.context,
-                      totalPlots: totalPlots,
-                      samplesPerPlot: samplesPerPlot,
-                      sampleFileNeeded: sampleFileNeeded});
+    return getErrors({
+      ...this.context,
+      totalPlots: totalPlots,
+      samplesPerPlot: samplesPerPlot,
+      sampleFileNeeded: sampleFileNeeded
+    });
   };
 
   allAnswersHidden = (answers) => {
@@ -321,8 +492,8 @@ export default class CreateProjectWizard extends React.Component {
     return projectId === -1 || originalProject.availability === "unpublished"
       ? this.steps
       : filterObject(this.steps, ([key, _val]) =>
-          ["overview", "imagery", "questions"].includes(key)
-        );
+        ["overview", "imagery", "questions"].includes(key)
+      );
   };
 
   checkAllSteps = () => {
@@ -415,14 +586,19 @@ export default class CreateProjectWizard extends React.Component {
   };
 
 
-  clearTemplateUserAssignments = (templateProject) => 
+  clearTemplateUserAssignments = (templateProject) =>
     this.context.institutionId != templateProject.templateInstitutionId ?
-      {...templateProject,
-       designSettings: {...templateProject.designSettings,
-                        userAssignment: {
-                            userMethod: null,
-                            users: [],
-                            percents: []}}}
+      {
+        ...templateProject,
+        designSettings: {
+          ...templateProject.designSettings,
+          userAssignment: {
+            userMethod: null,
+            users: [],
+            percents: []
+          }
+        }
+      }
       : templateProject;
 
 
@@ -501,7 +677,16 @@ export default class CreateProjectWizard extends React.Component {
             className="col-7 px-0 mr-2 overflow-auto bg-lightgray"
             style={{ border: "1px solid black", borderRadius: "6px" }}
           >
-            <h2 className="bg-lightgreen w-100 py-1">{description}</h2>
+            <div className="bg-lightgreen w-100 py-1" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 1rem" }}>
+              <h2 style={{ margin: 0, flexGrow: 1 }}>{description}</h2>
+              {Object.keys(this.getSteps()).indexOf(this.context.wizardStep) > 1 && (
+                <button className="btn btn-secondary" onClick={this.saveDraft} style={{ marginLeft: "auto" }} title="Save Draft (Remains for 7 days)">
+                  <div style={{ color: "white" }}>
+                    <SvgIcon icon="save" size="1rem" />
+                  </div>
+                </button>
+              )}
+            </div>
             <div className="p-3">
               <StepComponent />
             </div>

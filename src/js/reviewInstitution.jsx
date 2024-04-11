@@ -47,6 +47,50 @@ class ReviewInstitution extends React.Component {
     );
   };
 
+
+    // getProjectList = () => {
+    // this.processModal(
+    //   "Loading institution data",
+    //   Promise.all([
+    //     fetch(`/get-institution-projects?institutionId=${this.props.institutionId}`)
+    //       .then(response => response.ok ? response.json() : Promise.reject(response))
+    //       .then(projects => projects.map(project => ({...project, isDraft: false}))), // Add isDraft: false to each project
+    //     fetch(`/get-drafts?institutionId=${this.props.institutionId}`)
+    //       .then(response => response.ok ? response.json() : Promise.reject(response))
+    //       .then(projects => projects.map(project => ({...project, isDraft: true}))) // Add isDraft: true to each draft project
+    //   ])
+    //   .then(([institutionProjects, draftProjects]) => {
+    //     // Combine both arrays with draft status differentiated
+    //     const combinedProjects = institutionProjects.concat(draftProjects);
+    //     this.setState({ projectList: combinedProjects });
+    //   })
+    //   .catch(error => {
+    //     console.log(error);
+    //     alert("Error retrieving the project info. See console for details.");
+    //   })
+    // );
+
+  getProjectList = () => {
+    // Simulate loading modal for testing
+    this.processModal("Loading institution data", Promise.resolve().then(() => {
+      // Hardcoded data for testing, simulating the combined result of fetch calls
+      const combinedProjects = [
+        { id: 1, name: "Test Project 1", numPlots: 3, privacyLevel: "public", percentComplete: 0 },
+        { id: 2, name: "Draft Project 1", numPlots: 5, privacyLevel: "private", percentComplete: 50, draftId: 1 }
+        // Add more objects as needed for testing
+      ];
+
+      // Directly return the combinedProjects for testing purposes
+      this.setState({ projectList: combinedProjects });
+    }).catch(error => {
+      console.log(error);
+      alert("Error retrieving the project info. See console for details.");
+    }));
+  };
+
+  // };
+
+
   archiveProject = (projectId) => {
     if (confirm("Do you REALLY want to delete this project? This operation cannot be undone.")) {
       fetch(`/archive-project?projectId=${projectId}`, { method: "POST" }).then((response) => {
@@ -952,15 +996,16 @@ class NewImagery extends React.Component {
       type === "PlanetNICFI"
         ? [
             params[0],
-            {
-              ...params[1],
-              options: [
-                ...params[1].options,
-                ...nicfiLayers.map((l) => ({ label: l.slice(34, l.length - 7), value: l })),
-              ],
-            },
-            params[2],
-          ]
+          params[0],
+          {
+            ...params[1],
+            options: [
+              ...params[1].options,
+              ...nicfiLayers.map((l) => ({ label: l.slice(34, l.length - 7), value: l })),
+            ],
+          },
+          params[2],
+        ]
         : params;
 
     return (
@@ -1140,6 +1185,7 @@ function ProjectList({ isAdmin, institutionId, projectList, isVisible, deletePro
           deleteProject={deleteProject}
           isAdmin={isAdmin}
           project={project}
+          institutionId={institutionId}
         />
       ));
     }
@@ -1179,7 +1225,7 @@ function ProjectList({ isAdmin, institutionId, projectList, isVisible, deletePro
   );
 }
 
-function Project({ project, isAdmin, deleteProject }) {
+function Project({ project, isAdmin, deleteProject, institutionId }) {
   return (
     <div className="row mb-1 d-flex">
       <div className="col-2 pr-0">
@@ -1188,27 +1234,38 @@ function Project({ project, isAdmin, deleteProject }) {
         </div>
       </div>
       <div className="col overflow-hidden">
-        <a
-          className="btn btn-sm btn-outline-lightgreen btn-block text-truncate"
-          href={`/collection?projectId=${project.id}`}
-          style={{
-            boxShadow:
-              project.percentComplete === 0.0
+        {project.draftId ? (
+          <span
+            className="btn btn-sm btn-outline-lightgreen btn-block text-truncate"
+            style={{
+              boxShadow: "0px 0px 6px 1px grey inset",
+              cursor: "default",
+            }}
+          >
+            {project.name}
+          </span>
+        ) : (
+          <a
+            className="btn btn-sm btn-outline-lightgreen btn-block text-truncate"
+            href={`/collection?projectId=${project.id}`}
+            style={{
+              boxShadow: project.percentComplete === 0.0
                 ? "0px 0px 6px 1px red inset"
                 : project.percentComplete >= 100.0
-                ? "0px 0px 6px 2px #3bb9d6 inset"
-                : "0px 0px 6px 1px yellow inset",
-          }}
-        >
-          {project.name}
-        </a>
+                  ? "0px 0px 6px 2px #3bb9d6 inset"
+                  : "0px 0px 6px 1px yellow inset",
+            }}
+          >
+            {project.name}
+          </a>
+        )}
       </div>
       {isAdmin && (
         <>
           <div className="col-1 pl-0">
             <button
               className="btn btn-sm btn-outline-yellow btn-block"
-              onClick={() => window.location.assign(`/review-project?projectId=${project.id}`)}
+              onClick={() => window.location.assign(project.draftId ? `/create-project?institutionId=${institutionId}&draftId=${project.draftId}` : `/review-project?projectId=${project.id}`)} 
               style={{
                 alignItems: "center",
                 display: "flex",

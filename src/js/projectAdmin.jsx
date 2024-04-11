@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { LoadingModal, NavigationBar } from "./components/PageComponents";
+import { LoadingModal, NavigationBar, SuccessModal } from "./components/PageComponents";
 import CreateProjectWizard from "./project/CreateProjectWizard";
 import ReviewChanges from "./project/ReviewChanges";
 import ManageProject from "./project/ManageProject";
@@ -77,6 +77,7 @@ class Project extends React.Component {
       institutionUserList: [],
       designMode: this.props.projectId > 0 ? "manage" : "wizard",
       modalMessage: null,
+      successMessage: null,
       wizardStep: "overview",
       doiPath: "",
     };
@@ -88,7 +89,8 @@ class Project extends React.Component {
     this.getDoiPath(this.props.projectId);
     if (this.props.institutionId > 0) {
       this.getInstitutionImagery(this.props.institutionId);
-    } else if (!this.props.projectId > 0) {
+    } 
+    else if (!this.props.projectId > 0) {
       alert("Invalid URL.");
       window.location = "/home";
     }
@@ -156,6 +158,14 @@ class Project extends React.Component {
     );
   };
 
+  setSuccessMessage = (message) => {
+    this.setState({ successMessage: message });
+    // Clear the message after 3000 milliseconds (3 seconds)
+    setTimeout(() => {
+      this.setState({ successMessage: "" });
+    }, 3000);
+  }
+
   render() {
     const CurrentComponent = this.modes[this.state.designMode];
     return (
@@ -163,6 +173,7 @@ class Project extends React.Component {
         value={{
           institutionId: this.props.institutionId,
           projectId: this.props.projectId,
+          draftId: this.props.draftId,
           ...this.state.projectDetails, // TODO: Do not spread projectDetails into context.
           originalProject: this.state.originalProject,
           designMode: this.state.designMode,
@@ -172,11 +183,13 @@ class Project extends React.Component {
           setContextState: this.setContextState,
           resetProject: this.resetProject,
           processModal: this.processModal,
+          setSuccessMessage: this.setSuccessMessage,
           wizardStep: this.state.wizardStep,
           doiPath: this.state.doiPath,
         }}
       >
         {this.state.modalMessage && <LoadingModal message={this.state.modalMessage} />}
+        {this.state.successMessage && <SuccessModal message={this.state.successMessage} />}
         <div>
           <CurrentComponent />
         </div>
@@ -191,6 +204,7 @@ export function pageInit(params, session) {
       <Project
         institutionId={parseInt(params.institutionId) || -1}
         projectId={parseInt(params.projectId) || -1}
+        draftId={parseInt(params.draftId) || -1}
       />
     </NavigationBar>,
     document.getElementById("app")
