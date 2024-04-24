@@ -1,6 +1,6 @@
 (ns collect-earth-online.routing
   (:require [collect-earth-online.db.doi          :as doi]
-            ;; [collect-earth-online.db.geodash      :as geodash]
+            [collect-earth-online.db.geodash      :as geodash]
             [collect-earth-online.db.imagery      :as imagery]
             [collect-earth-online.db.institutions :as institutions]
             [collect-earth-online.db.plots        :as plots]
@@ -195,13 +195,13 @@
    [:post "/archive-institution-imagery"]   {:handler     imagery/archive-institution-imagery
                                              :auth-type   :admin
                                              :auth-action :block}
-  ;;  ;; GeoDash API
-  ;;  [:get  "/geo-dash/get-project-widgets"]  {:handler geodash/get-project-widgets}
-  ;;  [:post "/geo-dash/copy-project-widgets"] {:handler geodash/copy-project-widgets}
-  ;;  [:post "/geo-dash/create-widget"]        {:handler geodash/create-dashboard-widget-by-id}
-  ;;  [:post "/geo-dash/delete-widget"]        {:handler geodash/delete-dashboard-widget-by-id}
-  ;;  [:post "/geo-dash/gateway-request"]      {:handler geodash/gateway-request}
-  ;;  [:post "/geo-dash/update-widget"]        {:handler geodash/update-dashboard-widget-by-id}
+   ;; GeoDash API
+   [:get  "/geo-dash/get-project-widgets"]  {:handler geodash/get-project-widgets}
+   [:post "/geo-dash/copy-project-widgets"] {:handler geodash/copy-project-widgets}
+   [:post "/geo-dash/create-widget"]        {:handler geodash/create-dashboard-widget-by-id}
+   [:post "/geo-dash/delete-widget"]        {:handler geodash/delete-dashboard-widget-by-id}
+   [:post "/geo-dash/gateway-request"]      {:handler geodash/gateway-request}
+   [:post "/geo-dash/update-widget"]        {:handler geodash/update-dashboard-widget-by-id}
    ;; Proxy Routes
    [:get  "/get-tile"]                      {:handler     proxy/proxy-imagery
                                              :auth-type   :no-cross
