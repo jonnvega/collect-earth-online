@@ -114,57 +114,7 @@ export default class CreateProjectWizard extends React.Component {
       complete: new Set(),
       templateProject: {},
       templatePlots: [],
-      templateProjectList: [{ id: -1, name: "Loading..." }],
-      draftProject: {
-        institution: -1,
-        name: "draft",
-        description: "draft",
-        designSettings: {
-          userAssignment: {
-            userMethod: "equal",
-            users: [],
-            percents: [],
-          },
-          qaqcAssignment: {
-            qaqcMethod: "none",
-            percent: 0,
-            smes: [],
-            timesToReview: 2,
-          },
-          sampleGeometries: {
-            points: true,
-            lines: true,
-            polygons: true,
-          },
-        },
-        projectOptions: {
-          showGEEScript: false,
-          showPlotInformation: false,
-          collectConfidence: false,
-          autoLaunchGeoDash: true,
-        },
-        plotDistribution: "csv",
-        imageryId: -1,
-        aoiFeatures: [],
-        aoiFileName: "",
-        boundaryType: "manual",
-        numPlots: "",
-        plotSpacing: "",
-        plotShape: "square",
-        plotSize: "",
-        shufflePlots: false,
-        sampleDistribution: "shp",
-        sampleResolution: "",
-        samplesPerPlot: "",
-        allowDrawnSamples: false,
-        surveyQuestions: {},
-        surveyRules: [],
-        templateProjectId: -1,
-        useTemplateWidgets: false,
-        useTemplatePlots: false,
-        projectImageryList: [],
-        plots: [],
-      }
+      templateProjectList: [{ id: -1, name: "Loading..." }]
     };
   }
 
@@ -184,20 +134,20 @@ export default class CreateProjectWizard extends React.Component {
   /// API Calls
 
   getDraftById = (draftId) =>
-  fetch(`/get-draft-by-id?draftId=${draftId}`)
-    // .then((response) => (response.ok ? response.json() : Promise.reject(response)))
-    // .then((data) => {
-    //   if (data === "") {
-    //     alert("No draft found with ID " + draftId + ".");
-    //     window.location = "/home";
-    //   } else {
-    //     this.context.setProjectDetails(data);
-    //     this.context.setContextState({ originalProject: data });
-    //     return data.institution;
-    //   }
-    // })
-    // .then((institutionId) => this.getInstitutionUserList(institutionId));
-    .then(() => this.context.setProjectDetails({ ...this.state.draftProject }))
+  fetch(`/get-project-draft-by-id?projectDraftId=${draftId}`)
+    .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+    .then((data) => {
+      if (data === "") {
+        console.log(data)
+        alert("No draft found with ID " + draftId + ".");
+        window.location = "/home";
+      } else {
+        this.context.setProjectDetails(data[0]);
+        return data.institution;
+      }
+    })
+    .then((institutionId) => this.getInstitutionUserList(institutionId))
+    // .then(() => this.context.setProjectDetails({ ...this.state.draftProject }))
 
   buildDraftObject = () => ({
     imageryId: this.context.imageryId,
@@ -227,65 +177,69 @@ export default class CreateProjectWizard extends React.Component {
     sampleFileBase64: this.context.sampleFileBase64,
   });
 
-  saveDraft = (data) => {
-    if (this.context.projectDetails.draftId > 0) {
+  saveDraft = () => {
+    //If draft exists already
+    if (this.context.draftId > 0) {
+      const body = JSON.stringify({
+        projectDraftId: this.context.draftId,
+        institutionId: this.context.institutionId,
+        projectTemplate: this.context.templateProjectId,
+        useTemplatePlots: this.context.useTemplatePlots,
+        useTemplateWidgets: this.context.useTemplateWidgets,
+        ...this.buildDraftObject(),
+      })
       this.context.processModal("Updating Draft", () =>
-      fetch("/update-draft", {
+      fetch("/update-project-draft", {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json; charset=utf-8",
         },
-        body: JSON.stringify({
-          draftId: this.context.draftId,
-          institutionId: this.context.institutionId,
-          projectTemplate: this.context.templateProjectId,
-          useTemplatePlots: this.context.useTemplatePlots,
-          useTemplateWidgets: this.context.useTemplateWidgets,
-          ...this.buildDraftObject(),
-        }),
+        body,
       })
-        // .then((response) => Promise.all([response.ok, response.json()]))
-        // .then((data) => {
-        //   if (data[0] && Number.isInteger(data[1].draftId)) {
-        //     this.context.setSuccessMessage("Draft saved.");
-        //     return Promise.resolve();
-        //   } else {
-        //     return Promise.reject(data[1]);
-        //   }
-        // })
+        .then((response) => (response.ok ? response.json() : Promise.reject(response)))
+        .then((data) => {
+          if (data) {
+            console.log(data)
+            this.context.setSuccessMessage("Draft saved.");
+            return Promise.resolve();
+          } else {
+            return Promise.reject(data);
+          }
+        })
         .then(() => {
-          
           this.context.setSuccessMessage("Draft saved.")})
         .catch((message) => {
           alert("Error creating draft:\n" + message);
         })
       );
     } else {
+      const body = JSON.stringify({
+        institutionId: this.context.institutionId,
+        projectTemplate: this.context.templateProjectId,
+        useTemplatePlots: this.context.useTemplatePlots,
+        useTemplateWidgets: this.context.useTemplateWidgets,
+        ...this.buildDraftObject(),
+      })
       this.context.processModal("Creating Draft", () =>
-      fetch("/create-draft", {
+      fetch("/create-project-draft", {
         method: "POST",
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json; charset=utf-8",
         },
-        body: JSON.stringify({
-          institutionId: this.context.institutionId,
-          projectTemplate: this.context.templateProjectId,
-          useTemplatePlots: this.context.useTemplatePlots,
-          useTemplateWidgets: this.context.useTemplateWidgets,
-          ...this.buildDraftObject(),
-        }),
+        body,
       })
-        // .then((response) => Promise.all([response.ok, response.json()]))
-        // .then((data) => {
-        //   if (data[0] && Number.isInteger(data[1].draftId)) {
-        //     this.context.setSuccessMessage("Draft saved.");
-        //     return Promise.resolve();
-        //   } else {
-        //     return Promise.reject(data[1]);
-        //   }
-        // })
+        .then((response) => Promise.all([response.ok, response.json()]))
+        .then((data) => {
+          if (data[0] && Number.isInteger(data[1].projectDraftId)) {
+            this.context.setContextState({ draftId: data[1].projectDraftId })
+            this.context.setSuccessMessage("Draft saved.");
+            return Promise.resolve();
+          } else {
+            return Promise.reject(data[1]);
+          }
+        })
         .then(() => this.context.setSuccessMessage("Draft saved."))
         .catch((message) => {
           alert("Error creating draft:\n" + message);

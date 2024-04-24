@@ -31,65 +31,27 @@ class ReviewInstitution extends React.Component {
   }
 
   /// API Calls
-
   getProjectList = () => {
-    // TODO, move all API calls to this component to use Promise.all()
-    // This is usually the longest API call so the loading modal should stay up until all is loaded.
-    this.processModal(
-      "Loading institution data",
-      fetch(`/get-institution-projects?institutionId=${this.props.institutionId}`)
-        .then((response) => (response.ok ? response.json() : Promise.reject(response)))
-        .then((data) => this.setState({ projectList: data }))
-        .catch((response) => {
-          console.log(response);
-          alert("Error retrieving the project info. See console for details.");
-        })
-    );
-  };
-
-
-    // getProjectList = () => {
-    // this.processModal(
-    //   "Loading institution data",
-    //   Promise.all([
-    //     fetch(`/get-institution-projects?institutionId=${this.props.institutionId}`)
-    //       .then(response => response.ok ? response.json() : Promise.reject(response))
-    //       .then(projects => projects.map(project => ({...project, isDraft: false}))), // Add isDraft: false to each project
-    //     fetch(`/get-drafts?institutionId=${this.props.institutionId}`)
-    //       .then(response => response.ok ? response.json() : Promise.reject(response))
-    //       .then(projects => projects.map(project => ({...project, isDraft: true}))) // Add isDraft: true to each draft project
-    //   ])
-    //   .then(([institutionProjects, draftProjects]) => {
-    //     // Combine both arrays with draft status differentiated
-    //     const combinedProjects = institutionProjects.concat(draftProjects);
-    //     this.setState({ projectList: combinedProjects });
-    //   })
-    //   .catch(error => {
-    //     console.log(error);
-    //     alert("Error retrieving the project info. See console for details.");
-    //   })
-    // );
-
-  getProjectList = () => {
-    // Simulate loading modal for testing
-    this.processModal("Loading institution data", Promise.resolve().then(() => {
-      // Hardcoded data for testing, simulating the combined result of fetch calls
-      const combinedProjects = [
-        { id: 1, name: "Test Project 1", numPlots: 3, privacyLevel: "public", percentComplete: 0 },
-        { id: 2, name: "Draft Project 1", numPlots: 5, privacyLevel: "private", percentComplete: 50, draftId: 1 }
-        // Add more objects as needed for testing
-      ];
-
-      // Directly return the combinedProjects for testing purposes
-      this.setState({ projectList: combinedProjects });
-    }).catch(error => {
-      console.log(error);
-      alert("Error retrieving the project info. See console for details.");
-    }));
-  };
-
-  // };
-
+      this.processModal(
+        "Loading institution data",
+       Promise.all([
+         fetch(`/get-institution-projects?institutionId=${this.props.institutionId}`)
+           .then(response => response.ok ? response.json() : Promise.reject(response))
+           .then(projects => projects.map(project => ({ ...project, isDraft: false }))), // Add isDraft: false to each project
+         fetch(`/get-project-drafts-by-user?institutionId=${this.props.institutionId}&userId=${this.props.userId}`)
+           .then(response => response.ok ? response.json() : Promise.resolve([]))
+           .then(projects => projects.map(project => ({ ...project, isDraft: true }))) // Add isDraft: true to each draft project
+       ])
+         .then(([institutionProjects, draftProjects]) => {
+           const combinedProjects = institutionProjects.concat(draftProjects);
+           this.setState({ projectList: combinedProjects });
+         })
+         .catch(error => {
+           console.log(error);
+           alert("Error retrieving the project info. See console for details.");
+       })
+     )
+    };
 
   archiveProject = (projectId) => {
     if (confirm("Do you REALLY want to delete this project? This operation cannot be undone.")) {
@@ -1230,11 +1192,15 @@ function Project({ project, isAdmin, deleteProject, institutionId }) {
     <div className="row mb-1 d-flex">
       <div className="col-2 pr-0">
         <div className="btn btn-sm btn-outline-lightgreen btn-block">
-          {capitalizeFirst(project.privacyLevel)}
+          {project.isDraft ? (
+            "Draft"
+          ) : (
+            capitalizeFirst(project.privacyLevel)
+          )}
         </div>
       </div>
       <div className="col overflow-hidden">
-        {project.draftId ? (
+        {project.isDraft ? (
           <span
             className="btn btn-sm btn-outline-lightgreen btn-block text-truncate"
             style={{
@@ -1255,7 +1221,7 @@ function Project({ project, isAdmin, deleteProject, institutionId }) {
                   ? "0px 0px 6px 2px #3bb9d6 inset"
                   : "0px 0px 6px 1px yellow inset",
             }}
-          >
+            >
             {project.name}
           </a>
         )}
@@ -1265,7 +1231,7 @@ function Project({ project, isAdmin, deleteProject, institutionId }) {
           <div className="col-1 pl-0">
             <button
               className="btn btn-sm btn-outline-yellow btn-block"
-              onClick={() => window.location.assign(project.draftId ? `/create-project?institutionId=${institutionId}&draftId=${project.draftId}` : `/review-project?projectId=${project.id}`)} 
+              onClick={() => window.location.assign(project.isDraft ? `/create-project?institutionId=${institutionId}&draftId=${project.id}` : `/review-project?projectId=${project.id}`)} 
               style={{
                 alignItems: "center",
                 display: "flex",

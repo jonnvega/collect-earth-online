@@ -14,8 +14,8 @@ class Project extends React.Component {
 
     this.blankProject = {
       institution: -1,
-      name: "",
-      description: "",
+      name: "test",
+      description: "test",
       designSettings: {
         userAssignment: {
           userMethod: "none",
